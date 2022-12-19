@@ -1,11 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
 const { SECRET: secret } = process.env;
 
 exports.home = (req, res) => {
-  res.status(201).send('<h1 style="text-align: center">Auth with CRUD</h1>');
+  res.status(201).send('<h1 style="text-align: center">CRUD with Authentication</h1>');
 };
 
 exports.register = async (req, res) => {
@@ -26,13 +25,9 @@ exports.register = async (req, res) => {
       throw new Error('Email should be in correct format');
     }
 
-    if (phoneNo.length === 10) {
-      for (const digit of phoneNo) {
-        if (!Number.isInteger(Number(digit))) {
-          throw new Error('Phone No should be in correct format');
-        }
-      }
-    } else {
+    if (
+      !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
+    ) {
       throw new Error('PhoneNo should be in correct format');
     }
 
@@ -52,8 +47,22 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
+    const token = jwt.sign({ id: newUser._id }, secret, { expiresIn: '24h' });
+    newUser.token = token;
+    await newUser.save();
+
+    res.status(201).cookie('token', token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
     newUser.password = undefined;
-    res.status(201).json(newUser);
+    newUser.token = undefined;
+    res.status(201).json({
+      success: true,
+      message: 'User has been successfully registered',
+      newUser,
+    });
   } catch (err) {
     res.status(401).json({
       success: false,
@@ -84,7 +93,7 @@ exports.login = async (req, res) => {
 
     if (user) {
       if (await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign({ id: user._id }, secret, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user._id }, secret, { expiresIn: '24h' });
         user.token = token;
         user.loggedIn = true;
         await user.save();
@@ -94,9 +103,10 @@ exports.login = async (req, res) => {
           expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         });
 
-        user.password = undefined;
-        user.token = undefined;
-        res.status(201).json(user);
+        res.status(201).json({
+          success: true,
+          message: 'User has successfully logged in',
+        });
       } else {
         throw new Error('Please enter correct password');
       }
@@ -111,10 +121,129 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = () => {};
+exports.logout = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    user.loggedIn = false;
+    await user.save();
 
-exports.getUsers = () => {};
-exports.getUser = () => {};
-exports.deleteUser = () => {};
-exports.editUser = () => {};
-exports.getUser = () => {};
+    res.status(201).json({
+      success: true,
+      message: 'User has successfully logged out',
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: 'Unable to logout',
+    });
+  }
+};
+
+exports.getUsers = async (req, res) => {
+  try {
+    let users = await User.find();
+
+    users = users.map(user => {
+      user.password = undefined;
+      user.token = undefined;
+      return user;
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'All the users have been successfully fetched',
+      users,
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: 'Cannot fetch users',
+    });
+  }
+};
+
+exports.getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    user.password = undefined;
+    user.token = undefined;
+
+    res.status(201).json({
+      success: true,
+      message: 'User has been successfully fetched',
+      user,
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: 'Cannot fetch user',
+    });
+  }
+};
+
+exports.editUser = async (req, res) => {
+  try {
+    const { firstname, lastname, email, phoneNo, password } = req.body;
+
+    if (!(firstname && lastname && email && phoneNo && password)) {
+      throw new Error('Please enter all the details');
+    }
+
+    if (
+      !(
+        email.endsWith('@gmail.com') ||
+        email.endsWith('@outlook.com') ||
+        email.endsWith('@hotmail.com')
+      )
+    ) {
+      throw new Error('Email should be in correct format');
+    }
+
+    if (
+      !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
+    ) {
+      throw new Error('PhoneNo should be in correct format');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.findByIdAndUpdate(req.params.userId, {
+      firstname,
+      lastname,
+      email,
+      phoneNo,
+      password: hashedPassword,
+    });
+
+    const updatedUser = await User.findById(req.params.userId);
+    updatedUser.password = undefined;
+    updatedUser.token = undefined;
+
+    res.status(201).json({
+      success: true,
+      message: 'User has been successfully updated',
+      updatedUser,
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.userId);
+
+    res.status(201).json({
+      success: true,
+      message: 'User has been successfully deleted',
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      message: 'Cannot delete user',
+    });
+  }
+};
