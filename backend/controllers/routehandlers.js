@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
     }
 
     if (password !== confirmPassword) {
-      throw new Error("Confirmed password doesn't match with password");
+      throw new Error("Confirmed password doesn't match with original password");
     }
 
     const user = await User.findOne({ email });
@@ -207,7 +207,7 @@ exports.editUser = async (req, res) => {
     }
 
     if (password !== confirmPassword) {
-      throw new Error("Confirmed password doesn't match with password");
+      throw new Error("Confirmed password doesn't match with original password");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -1,35 +1,35 @@
 function LoginTable() {
   return (
     <>
-      <h1>LoggedIn Users</h1>
+      <h1 className="mt-16 text-3xl text-center">LoggedIn Users</h1>
 
-      <table>
+      <table className="mt-10 mx-auto w-4/5">
         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Show</th>
-            <th>Edit</th>
-            <th>Delete</th>
-            <th>Logout</th>
+          <tr className="border">
+            <th className="text-left font-semibold px-4 py-2">Name</th>
+            <th className="text-left font-semibold px-4 py-2">Email</th>
+            <th className="text-left font-semibold px-4 py-2">View</th>
+            <th className="text-left font-semibold px-4 py-2">Edit</th>
+            <th className="text-left font-semibold px-4 py-2">Delete</th>
+            <th className="text-left font-semibold px-4 py-2">Logout</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr>
-            <td>Shubham Purwar</td>
-            <td>shubhampurwar34</td>
-            <td>
-              <button>Show</button>
+          <tr className="border">
+            <td className="px-4 py-2.5">Shubham Purwar</td>
+            <td className="px-4 py-2.5">shubhampurwar35@gmail.com</td>
+            <td className="px-4 py-2.5">
+              <button className="text-yellow-500">View</button>
             </td>
-            <td>
-              <button>Edit</button>
+            <td className="px-4 py-2.5">
+              <button className="text-green-500">Edit</button>
             </td>
-            <td>
-              <button>Delete</button>
+            <td className="px-4 py-2.5">
+              <button className="text-red-500">Delete</button>
             </td>
-            <td>
-              <button>Logout</button>
+            <td className="px-4 py-2.5">
+              <button className="text-blue-500">Logout</button>
             </td>
           </tr>
         </tbody>
