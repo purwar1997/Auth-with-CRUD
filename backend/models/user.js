@@ -36,7 +36,12 @@ const userSchema = new Schema({
     required: [true, 'Password is required'],
     unique: true,
   },
-  loggedIn: {
+  hashedPassword: {
+    type: String,
+    default: null,
+    unique: true,
+  },
+  isLogged: {
     type: Boolean,
     default: false,
   },

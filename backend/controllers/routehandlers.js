@@ -25,6 +25,12 @@ exports.register = async (req, res) => {
       throw new Error('Email should be in correct format');
     }
 
+    const user = await User.findOne({ email });
+
+    if (user) {
+      throw new Error('User already exists');
+    }
+
     if (
       !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
     ) {
@@ -35,12 +41,6 @@ exports.register = async (req, res) => {
       throw new Error("Confirmed password doesn't match with original password");
     }
 
-    const user = await User.findOne({ email });
-
-    if (user) {
-      throw new Error('User already exists');
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
@@ -48,7 +48,8 @@ exports.register = async (req, res) => {
       lastname,
       email,
       phoneNo,
-      password: hashedPassword,
+      password,
+      hashedPassword,
     });
 
     const token = jwt.sign({ id: newUser._id }, secret, { expiresIn: '24h' });
@@ -60,7 +61,7 @@ exports.register = async (req, res) => {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    newUser.password = undefined;
+    newUser.hashedPassword = undefined;
     newUser.token = undefined;
     res.status(201).json({
       success: true,
@@ -96,10 +97,10 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user) {
-      if (await bcrypt.compare(password, user.password)) {
+      if (await bcrypt.compare(password, user.hashedPassword)) {
         const token = jwt.sign({ id: user._id }, secret, { expiresIn: '24h' });
         user.token = token;
-        user.loggedIn = true;
+        user.isLogged = true;
         await user.save();
 
         res.status(201).cookie('token', token, {
@@ -127,7 +128,7 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    await User.findByIdAndUpdate(res.user._id, { loggedIn: false });
+    await User.findByIdAndUpdate(res.user._id, { isLogged: false });
 
     res.status(201).json({
       success: true,
@@ -146,7 +147,7 @@ exports.getUsers = async (req, res) => {
     let users = await User.find();
 
     users = users.map(user => {
-      user.password = undefined;
+      user.hashedPassword = undefined;
       user.token = undefined;
       return user;
     });
@@ -167,6 +168,7 @@ exports.getUsers = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const user = res.user;
+    user.hashedPassword = undefined;
     user.token = undefined;
 
     res.status(201).json({
@@ -184,9 +186,9 @@ exports.getUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, phoneNo, password, confirmPassword } = req.body;
+    const { firstname, lastname, email, phoneNo, password } = req.body;
 
-    if (!(firstname && lastname && email && phoneNo && password && confirmPassword)) {
+    if (!(firstname && lastname && email && phoneNo && password)) {
       throw new Error('Please enter all the details');
     }
 
@@ -206,10 +208,6 @@ exports.editUser = async (req, res) => {
       throw new Error('PhoneNo should be in correct format');
     }
 
-    if (password !== confirmPassword) {
-      throw new Error("Confirmed password doesn't match with original password");
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = res.user;
@@ -218,10 +216,11 @@ exports.editUser = async (req, res) => {
     user.lastname = lastname;
     user.email = email;
     user.phoneNo = phoneNo;
-    user.password = hashedPassword;
+    user.password = password;
+    user.hashedPassword = hashedPassword;
 
     const updatedUser = await user.save();
-    updatedUser.password = undefined;
+    updatedUser.hashedPassword = undefined;
     updatedUser.token = undefined;
 
     res.status(201).json({
