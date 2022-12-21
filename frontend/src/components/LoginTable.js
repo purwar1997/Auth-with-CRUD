@@ -79,7 +79,7 @@ function LoginTable({ userdata, user, setUser, capitalize }) {
       <h1 className="text-3xl text-center">LoggedIn Users</h1>
 
       <table className="mt-10 mb-16 mx-auto w-4/5">
-        <thead>
+        <thead className="bg-[#f5f5f5]">
           <tr className="border">
             <th className="text-left font-semibold px-4 py-2">Name</th>
             <th className="text-left font-semibold px-4 py-2">Email</th>

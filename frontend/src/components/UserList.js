@@ -43,7 +43,7 @@ function UserList({ user, setUser }) {
       <h1 className="mt-16 text-3xl text-center">Registered Users</h1>
 
       <table className="mt-10 mb-16 mx-auto w-2/3">
-        <thead>
+        <thead className="bg-[#f5f5f5]">
           <tr className="border">
             <th className="text-left font-semibold px-4 py-2">Name</th>
             <th className="text-left font-semibold px-4 py-2">Email</th>

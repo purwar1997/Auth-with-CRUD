@@ -4,7 +4,7 @@ function Profile({ user, capitalize }) {
       {user ? (
         <>
           <table className="mb-12 mx-auto w-1/2">
-            <thead>
+            <thead className="bg-[#f5f5f5]">
               <tr>
                 <th className="text-2xl font-normal py-3 border" colSpan="2">
                   User Profile
