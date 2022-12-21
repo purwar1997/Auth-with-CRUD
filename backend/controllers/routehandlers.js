@@ -9,9 +9,9 @@ exports.home = (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { firstname, lastname, email, phoneNo, password } = req.body;
+    const { firstname, lastname, email, phoneNo, password, confirmPassword } = req.body;
 
-    if (!(firstname && lastname && email && phoneNo && password)) {
+    if (!(firstname && lastname && email && phoneNo && password && confirmPassword)) {
       throw new Error('Please enter all the details');
     }
 
@@ -29,6 +29,10 @@ exports.register = async (req, res) => {
       !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
     ) {
       throw new Error('PhoneNo should be in correct format');
+    }
+
+    if (password !== confirmPassword) {
+      throw new Error("Confirmed password doesn't match with password");
     }
 
     const user = await User.findOne({ email });
@@ -123,9 +127,7 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    user.loggedIn = false;
-    await user.save();
+    await User.findByIdAndUpdate(res.user._id, { loggedIn: false });
 
     res.status(201).json({
       success: true,
@@ -164,8 +166,7 @@ exports.getUsers = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    user.password = undefined;
+    const user = res.user;
     user.token = undefined;
 
     res.status(201).json({
@@ -183,9 +184,9 @@ exports.getUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, phoneNo, password } = req.body;
+    const { firstname, lastname, email, phoneNo, password, confirmPassword } = req.body;
 
-    if (!(firstname && lastname && email && phoneNo && password)) {
+    if (!(firstname && lastname && email && phoneNo && password && confirmPassword)) {
       throw new Error('Please enter all the details');
     }
 
@@ -205,17 +206,21 @@ exports.editUser = async (req, res) => {
       throw new Error('PhoneNo should be in correct format');
     }
 
+    if (password !== confirmPassword) {
+      throw new Error("Confirmed password doesn't match with password");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.findByIdAndUpdate(req.params.userId, {
-      firstname,
-      lastname,
-      email,
-      phoneNo,
-      password: hashedPassword,
-    });
+    const user = res.user;
 
-    const updatedUser = await User.findById(req.params.userId);
+    user.firstname = firstname;
+    user.lastname = lastname;
+    user.email = email;
+    user.phoneNo = phoneNo;
+    user.password = hashedPassword;
+
+    const updatedUser = await user.save();
     updatedUser.password = undefined;
     updatedUser.token = undefined;
 
@@ -234,7 +239,7 @@ exports.editUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.userId);
+    await User.findByIdAndDelete(res.user._id);
 
     res.status(201).json({
       success: true,

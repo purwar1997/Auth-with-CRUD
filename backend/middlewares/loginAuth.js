@@ -5,6 +5,8 @@ module.exports = async (req, res, next) => {
 
   if (!user.loggedIn) {
     res.status(401).send('User is not logged in');
+  } else {
+    res.user = user;
   }
 
   next();
