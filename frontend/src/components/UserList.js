@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import LoginTable from './LoginTable';
 
-function UserList({ user, setUser }) {
+function UserList() {
   const [userdata, setUserdata] = useState('');
 
   const capitalize = value => `${value[0].toUpperCase()}${value.slice(1)}`;
@@ -11,7 +11,7 @@ function UserList({ user, setUser }) {
     async function fetchUsers() {
       try {
         const res = await axios.get('/getUsers');
-        console.log(res.data.users);
+        console.log(res.data);
         setUserdata(res.data.users);
       } catch (err) {
         console.log(`${err.message}\n${err.response.data.message}`);
@@ -32,7 +32,6 @@ function UserList({ user, setUser }) {
       });
 
       console.log(res.data);
-      setUser('');
     } catch (err) {
       console.log(`${err.message}\n${err.response.data.message}`);
       alert(err.response.data.message);
@@ -54,6 +53,7 @@ function UserList({ user, setUser }) {
                 <th className="text-left font-semibold px-4 py-2">Login</th>
               </tr>
             </thead>
+
             <tbody>
               {userdata.map(user => (
                 <tr className="border">
@@ -80,7 +80,7 @@ function UserList({ user, setUser }) {
         ''
       )}
 
-      <LoginTable userdata={userdata} user={user} setUser={setUser} capitalize={capitalize} />
+      <LoginTable userdata={userdata} capitalize={capitalize} />
     </>
   );
 }

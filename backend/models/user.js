@@ -35,6 +35,8 @@ const userSchema = new Schema({
     default: null,
     required: [true, 'Password is required'],
     unique: true,
+    minLength: 6,
+    maxLength: 20,
   },
   hashedPassword: {
     type: String,

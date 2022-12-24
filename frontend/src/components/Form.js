@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import axios from 'axios';
-import UserList from './UserList';
 
 function Form() {
   const [firstname, setFirstname] = useState('');
@@ -9,7 +8,6 @@ function Form() {
   const [phoneNo, setPhoneNo] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [user, setUser] = useState('');
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -25,18 +23,17 @@ function Form() {
       });
 
       console.log(res.data);
-      setUser('');
+
+      setFirstname('');
+      setLastname('');
+      setEmail('');
+      setPhoneNo('');
+      setPassword('');
+      setConfirmPassword('');
     } catch (err) {
       console.log(`${err.message}\n${err.response.data.message}`);
       alert(err.response.data.message);
     }
-
-    setFirstname('');
-    setLastname('');
-    setEmail('');
-    setPhoneNo('');
-    setPassword('');
-    setConfirmPassword('');
   };
 
   return (
@@ -154,8 +151,6 @@ function Form() {
           Submit
         </button>
       </form>
-
-      <UserList user={user} setUser={setUser} />
     </>
   );
 }

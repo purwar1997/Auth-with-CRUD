@@ -25,20 +25,24 @@ exports.register = async (req, res) => {
       throw new Error('Email should be in correct format');
     }
 
-    const user = await User.findOne({ email });
-
-    if (user) {
-      throw new Error('User already exists');
-    }
-
     if (
       !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
     ) {
       throw new Error('PhoneNo should be in correct format');
     }
 
+    if (password.length < 6) {
+      throw new Error('Password should be atleast 6 characters long');
+    }
+
     if (password !== confirmPassword) {
       throw new Error("Confirmed password doesn't match with original password");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (user) {
+      throw new Error('User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -206,6 +210,10 @@ exports.editUser = async (req, res) => {
       !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
     ) {
       throw new Error('PhoneNo should be in correct format');
+    }
+
+    if (password.length < 6) {
+      throw new Error('Password should be atleast 6 characters long');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

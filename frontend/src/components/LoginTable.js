@@ -1,44 +1,38 @@
+import { useState } from 'react';
 import axios from 'axios';
 import Profile from './Profile';
 
-function LoginTable({ userdata, user, setUser, capitalize }) {
-  const displayUser = async userId => {
-    try {
-      const res = await axios.get(`/getUser/${userId}`);
-      setUser(res.data.user);
-    } catch (err) {
-      console.log(`${err.message}\n${err.response.data.message}`);
-    }
-  };
+function LoginTable({ userdata, capitalize }) {
+  const [user, setUser] = useState('');
 
-  const editUser = async user => {
+  const editUser = async userInfo => {
     try {
       let firstname = prompt('Enter your firstname');
       if (!firstname) {
-        firstname = user.firstname;
+        firstname = userInfo.firstname;
       }
 
       let lastname = prompt('Enter your lastname');
       if (!lastname) {
-        lastname = user.lastname;
+        lastname = userInfo.lastname;
       }
 
       let email = prompt('Enter your email');
       if (!email) {
-        email = user.email;
+        email = userInfo.email;
       }
 
       let phoneNo = prompt('Enter your phoneNo');
       if (!phoneNo) {
-        phoneNo = user.phoneNo;
+        phoneNo = userInfo.phoneNo;
       }
 
       let password = prompt('Enter your password');
       if (!password) {
-        password = user.password;
+        password = userInfo.password;
       }
 
-      const res = await axios.put(`/editUser/${user._id}`, {
+      const res = await axios.put(`/editUser/${userInfo._id}`, {
         firstname,
         lastname,
         email,
@@ -47,7 +41,10 @@ function LoginTable({ userdata, user, setUser, capitalize }) {
       });
 
       console.log(res.data);
-      setUser('');
+
+      if (user._id === userInfo._id) {
+        setUser(res.data.updatedUser);
+      }
     } catch (err) {
       console.log(`${err.message}\n${err.response.data.message}`);
       alert(err.response.data.message);
@@ -58,7 +55,10 @@ function LoginTable({ userdata, user, setUser, capitalize }) {
     try {
       const res = await axios.delete(`/deleteUser/${userId}`);
       console.log(res.data);
-      setUser('');
+
+      if (userId === user._id) {
+        setUser('');
+      }
     } catch (err) {
       console.log(`${err.message}\n${err.response.data.message}`);
     }
@@ -68,7 +68,10 @@ function LoginTable({ userdata, user, setUser, capitalize }) {
     try {
       const res = await axios.put(`/logout/${userId}`);
       console.log(res.data);
-      setUser('');
+
+      if (userId === user._id) {
+        setUser('');
+      }
     } catch (err) {
       console.log(`${err.message}\n${err.response.data.message}`);
     }
@@ -100,7 +103,7 @@ function LoginTable({ userdata, user, setUser, capitalize }) {
                     </td>
                     <td className="px-4 py-2.5">{user.email}</td>
                     <td className="px-4 py-2.5">
-                      <button className="text-yellow-500" onClick={() => displayUser(user._id)}>
+                      <button className="text-yellow-500" onClick={() => setUser(user)}>
                         View
                       </button>
                     </td>
