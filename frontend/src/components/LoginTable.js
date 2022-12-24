@@ -2,37 +2,37 @@ import { useState } from 'react';
 import axios from 'axios';
 import Profile from './Profile';
 
-function LoginTable({ userdata, capitalize }) {
+function LoginTable({ users, capitalize }) {
   const [user, setUser] = useState('');
 
-  const editUser = async userInfo => {
+  const editUser = async userdata => {
     try {
       let firstname = prompt('Enter your firstname');
       if (!firstname) {
-        firstname = userInfo.firstname;
+        firstname = userdata.firstname;
       }
 
       let lastname = prompt('Enter your lastname');
       if (!lastname) {
-        lastname = userInfo.lastname;
+        lastname = userdata.lastname;
       }
 
       let email = prompt('Enter your email');
       if (!email) {
-        email = userInfo.email;
+        email = userdata.email;
       }
 
       let phoneNo = prompt('Enter your phoneNo');
       if (!phoneNo) {
-        phoneNo = userInfo.phoneNo;
+        phoneNo = userdata.phoneNo;
       }
 
       let password = prompt('Enter your password');
       if (!password) {
-        password = userInfo.password;
+        password = userdata.password;
       }
 
-      const res = await axios.put(`/editUser/${userInfo._id}`, {
+      const res = await axios.put(`/editUser/${userdata._id}`, {
         firstname,
         lastname,
         email,
@@ -42,7 +42,7 @@ function LoginTable({ userdata, capitalize }) {
 
       console.log(res.data);
 
-      if (user._id === userInfo._id) {
+      if (user._id === userdata._id) {
         setUser(res.data.updatedUser);
       }
     } catch (err) {
@@ -79,7 +79,7 @@ function LoginTable({ userdata, capitalize }) {
 
   return (
     <>
-      {userdata.length && userdata.some(user => user.isLogged) ? (
+      {users.length && users.some(user => user.isLogged) ? (
         <>
           <h1 className="text-3xl text-center">LoggedIn Users</h1>
           <table className="mt-10 mb-16 mx-auto w-4/5">
@@ -95,7 +95,7 @@ function LoginTable({ userdata, capitalize }) {
             </thead>
 
             <tbody>
-              {userdata.map(user =>
+              {users.map(user =>
                 user.isLogged ? (
                   <tr className="border">
                     <td className="px-4 py-2.5">
