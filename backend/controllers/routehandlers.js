@@ -209,7 +209,7 @@ exports.editUser = async (req, res) => {
     if (
       !(phoneNo.length === 10 && phoneNo.split().every(digit => Number.isInteger(Number(digit))))
     ) {
-      throw new Error('PhoneNo should be in correct format');
+      throw new Error('PhoneNo should be 10 characters long');
     }
 
     if (password.length < 6) {
