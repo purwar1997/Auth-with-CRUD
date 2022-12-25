@@ -18,7 +18,7 @@ function UserList() {
     }
 
     fetchUsers();
-  });
+  }, [users]);
 
   const loginUser = async () => {
     try {

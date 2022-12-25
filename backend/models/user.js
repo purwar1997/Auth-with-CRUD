@@ -33,10 +33,10 @@ const userSchema = new Schema({
   password: {
     type: String,
     default: null,
-    required: [true, 'Password is required'],
     unique: true,
-    minLength: 6,
-    maxLength: 20,
+    required: [true, 'Password is required'],
+    minLength: [6, 'Password is too short'],
+    maxLength: [20, 'Password is too long'],
   },
   hashedPassword: {
     type: String,
